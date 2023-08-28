@@ -1,0 +1,25 @@
+import cv2 as cv
+import matplotlib.pyplot as plt
+import numpy as np
+
+img_orig = cv.imread('spider.png', cv.IMREAD_COLOR)
+
+img_hsv = cv.cvtColor(img_orig, cv.COLOR_BGR2HSV)
+
+h, s, v = cv.split(img_hsv)
+a = 0.39
+f = s + a*(128*np.exp(-(((s-128)**2)/(2*70**2))))
+s = np.minimum(f,255).astype('uint8')
+
+hsv_img = cv.merge([h, s, v])
+
+img_proc = cv.cvtColor(hsv_img, cv.COLOR_HSV2BGR)
+
+cv.imwrite('hsv_proc.jpg', img_proc)
+
+cv.imshow("Original", img_orig)
+cv.waitKey(0)
+
+cv.imshow("Processed Spider", img_proc)
+cv.waitKey(0)
+cv.destroyAllWindows()
