@@ -1,0 +1,52 @@
+# Gamma Correction
+import cv2 as cv
+import matplotlib.pyplot as plt
+import numpy as np
+
+img_orig = cv.imread('highlights_and_shadows.jpg', cv.IMREAD_COLOR)
+print(img_orig.shape)
+
+img_lab = cv.cvtColor(img_orig, cv.COLOR_BGR2Lab)
+
+L_channel = img_lab[:, :, 0]
+gamma = 1.26
+
+L_corrected = ((L_channel / 255.0) ** gamma) * 255
+
+img_g = np.copy(img_lab)
+img_g[:,:,0] = L_corrected.astype('uint8')
+
+
+img_gamma = cv.cvtColor(img_g, cv.COLOR_Lab2BGR)
+cv.imwrite('gamma_hns.jpg', img_gamma)
+
+# Histogram of original Image
+
+img = cv.imread('highlights_and_shadows.jpg', cv.IMREAD_COLOR)
+color = ('b', 'g', 'r')
+for i, c in enumerate(color):
+    hist = cv.calcHist([img], [i], None, [256], [0,256])
+    plt.plot(hist, color = c)
+    plt.xlim([0,256])
+plt.show()
+
+# Histogram of gamma corrected Image
+
+img = cv.imread('gamma_hns.jpg', cv.IMREAD_COLOR)
+color = ('b', 'g', 'r')
+for i, c in enumerate(color):
+    hist = cv.calcHist([img], [i], None, [256], [0,256])
+    plt.plot(hist, color = c)
+    plt.xlim([0,256])
+plt.show()
+
+cv.imshow("Original", img_orig)
+cv.waitKey(0)
+cv.namedWindow("Gamma Corrected", cv.WINDOW_AUTOSIZE)
+cv.imshow("Gamma Corrected", img_gamma)
+
+
+cv.waitKey(0)
+cv.destroyAllWindows()
+
+
