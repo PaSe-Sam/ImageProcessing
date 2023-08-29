@@ -15,6 +15,25 @@ hsv_img = cv.merge([h, s, v])
 
 img_proc = cv.cvtColor(hsv_img, cv.COLOR_HSV2BGR)
 
+#fig, ax = plt.subplots()
+#ax.plot(f)
+#ax.set_xlabel(r'Input, $f(\mathbf{x})$')
+#ax.set_ylabel('Output, $\mathrm{T}[f(\mathbf{x})]$')
+#ax.set_xlim(0,255)
+#ax.set_ylim(0,255)
+#ax.set_aspect('equal') 
+#plt.show()
+
+x = np.arange(256)
+f = x + a * (128 * np.exp(-(((x - 128) ** 2) / (2 * 70 ** 2))))
+
+
+plt.plot(x, f)
+plt.xlabel('x')
+plt.ylabel('f')
+plt.title('Plot of f = x + a*(128*np.exp(-(((x-128)**2)/(2*70**2))))')
+plt.show()
+
 cv.imwrite('hsv_proc.jpg', img_proc)
 
 cv.imshow("Original", img_orig)
