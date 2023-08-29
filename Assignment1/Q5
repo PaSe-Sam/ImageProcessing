@@ -1,0 +1,43 @@
+# Histogram Equalization
+import cv2 as cv
+import numpy as np
+from matplotlib import pyplot as plt
+img = cv.imread('shells.tif',cv.IMREAD_GRAYSCALE)
+
+
+hist,bins = np.histogram(img.ravel(),256,[0,256])
+cdf = hist.cumsum()
+cdf_normalized = cdf * hist.max()/ cdf.max()
+plt.plot(cdf_normalized, color = 'b')
+plt.hist(img.flatten(),256,[0,256], color = 'r')
+plt.xlim([0,256])
+plt.legend(('cdf','histogram'), loc = 'upper left')
+plt.title('Histogram of the Original Image')
+plt.show()
+
+ 
+#equ = cv.equalizeHist(img)
+
+cdf_mapped = cdf_normalized * 255
+
+# round off values
+img_eq = np.round(cdf_mapped)
+
+# map the original intensity values to the equalized values
+equ = img_eq[img].astype('uint8')
+
+
+hist,bins = np.histogram(equ.ravel(),256,[0,256])
+cdf = hist.cumsum()
+cdf_normalized = cdf * hist.max()/ cdf.max()
+plt.plot(cdf_normalized, color = 'b')
+plt.hist(equ.flatten(),256,[0,256], color = 'r')
+plt.xlim([0,256])
+plt.legend(('cdf','histogram'), loc = 'upper left')
+plt.title('Histogram of the Equalized Image')
+plt.show()
+
+res = np.hstack((img,equ)) #stacking images side-by-side
+plt.axis('off')
+plt.imshow(img, cmap='gray')
+plt.imshow(res, cmap='gray')
