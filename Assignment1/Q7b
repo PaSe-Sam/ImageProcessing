@@ -3,7 +3,7 @@ import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
 
-img = cv.imread('einstein.png', cv.IMREAD_REDUCED_GRAYSCALE_2)
+img = cv.imread('einstein.png', cv.IMREAD_GRAYSCALE)
 
 # Averaging
 kernel_v = np.array([(-1, -2, -1), (0, 0, 0), (1, 2, 1)], dtype='float')
@@ -16,7 +16,13 @@ def sobel_filter(image, kernel):
     for y in range(0, height - 4):
         for x in range(0, width - 4):
             output[y,x] = np.sum(image[y:(y + 3), x:(x + 3)] * kernel)
-        
+
+            if output[y, x] < 0:        #Maintain pixel intensity between 0 and 255
+                output[y, x] = 0
+
+            elif output[y, x] > 255:  
+                output[y, x] = 255
+
     return output
 
 
