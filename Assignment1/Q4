@@ -2,43 +2,151 @@ import cv2 as cv
 import matplotlib.pyplot as plt
 import numpy as np
 
-img_orig = cv.imread('spider.png', cv.IMREAD_COLOR)
+img_orig = cv.imread('jeniffer.jpg', cv.IMREAD_COLOR)
 
 img_hsv = cv.cvtColor(img_orig, cv.COLOR_BGR2HSV)
 
 h, s, v = cv.split(img_hsv)
-a = 0.39
-f = s + a*(128*np.exp(-(((s-128)**2)/(2*70**2))))
-s = np.minimum(f,255).astype('uint8')
 
-hsv_img = cv.merge([h, s, v])
+plt.figure(figsize=(10, 10))
 
-img_proc = cv.cvtColor(hsv_img, cv.COLOR_HSV2BGR)
+plt.subplot(1, 3, 1)
+plt.imshow(h, cmap='gray')
+plt.title('H Channel')
 
-#fig, ax = plt.subplots()
-#ax.plot(f)
-#ax.set_xlabel(r'Input, $f(\mathbf{x})$')
-#ax.set_ylabel('Output, $\mathrm{T}[f(\mathbf{x})]$')
-#ax.set_xlim(0,255)
-#ax.set_ylim(0,255)
-#ax.set_aspect('equal') 
-#plt.show()
+plt.subplot(1, 3, 2)
+plt.imshow(s, cmap='gray')
+plt.title('S Channel')
 
-x = np.arange(256)
-f = x + a * (128 * np.exp(-(((x - 128) ** 2) / (2 * 70 ** 2))))
+plt.subplot(1, 3, 3)
+plt.imshow(v, cmap='gray')
+plt.title('V Channel')
 
-
-plt.plot(x, f)
-plt.xlabel('x')
-plt.ylabel('f')
-plt.title('Plot of f = x + a*(128*np.exp(-(((x-128)**2)/(2*70**2))))')
 plt.show()
 
-cv.imwrite('hsv_proc.jpg', img_proc)
+_,mask_v = cv.threshold(v, 155, 255, cv.THRESH_BINARY) 
 
-cv.imshow("Original", img_orig)
-cv.waitKey(0)
+v_foreground = cv.bitwise_and(img_orig, img_orig, mask=mask_v)
 
-cv.imshow("Processed Spider", img_proc)
-cv.waitKey(0)
-cv.destroyAllWindows()
+v_foreground = cv.cvtColor(v_foreground, cv.COLOR_BGR2RGB)
+plt.figure(figsize=(6, 6))
+plt.imshow(v_foreground)
+plt.title('Foreground')
+plt.show()
+
+color = ('b', 'g', 'r')
+for i, c in enumerate(color):
+    hist = cv.calcHist([v_foreground], [i], None, [256], [0,256])
+    plt.plot(hist, color = c)
+    plt.xlim([0,256])
+plt.title('Histogram of image in r, g, b')
+plt.show()
+
+
+
+
+
+hist_b = cv.calcHist([v_foreground], [0], None, [256], [0,256])
+hist_g = cv.calcHist([v_foreground], [1], None, [256], [0,256])
+hist_r = cv.calcHist([v_foreground], [2], None, [256], [0,256])
+
+c_hist_r = np.cumsum(hist_r)
+c_hist_g = np.cumsum(hist_g)
+c_hist_b = np.cumsum(hist_b)
+
+
+plt.figure(figsize=(15, 5))
+plt.subplot(131)
+plt.plot(c_hist_r, color='red')
+plt.title('Cumulative Red Channel Histogram')
+plt.xlabel('Pixel Value')
+plt.ylabel('Cumulative Frequency')
+plt.subplot(132)
+plt.plot(c_hist_g, color='green')
+plt.title('Cumulative Green Channel Histogram')
+plt.xlabel('Pixel Value')
+plt.ylabel('Cumulative Frequency')
+plt.subplot(133)
+plt.plot(c_hist_b, color='blue')
+plt.title('Cumulative Blue Channel Histogram')
+plt.xlabel('Pixel Value')
+plt.ylabel('Cumulative Frequency')
+plt.tight_layout()
+plt.show()
+
+
+
+equ_b = cv.equalizeHist(v_foreground[:, :, 0])
+equ_g = cv.equalizeHist(v_foreground[:, :, 1])
+equ_r = cv.equalizeHist(v_foreground[:, :, 2])
+
+
+equ_img = cv.merge((equ_b, equ_g, equ_r))
+
+
+equ_hist_b = cv.calcHist([equ_img], [0], None, [256], [0, 256])
+equ_hist_g = cv.calcHist([equ_img], [1], None, [256], [0, 256])
+equ_hist_r = cv.calcHist([equ_img], [2], None, [256], [0, 256])
+
+c_equ_hist_b = np.cumsum(equ_hist_b)
+c_equ_hist_g = np.cumsum(equ_hist_g)
+c_equ_hist_r = np.cumsum(equ_hist_r)
+
+plt.figure(figsize=(14, 4))
+plt.subplot(1, 2, 1)
+plt.imshow(cv.cvtColor(v_foreground, cv.COLOR_BGR2RGB))
+plt.title('Foreground')
+plt.axis('off')
+plt.subplot(1, 2, 2)
+plt.imshow(cv.cvtColor(equ_img, cv.COLOR_BGR2RGB))
+plt.title('Equalized Foreground')
+plt.axis('off')
+plt.tight_layout()
+plt.show()
+
+plt.figure(figsize=(14, 4))
+plt.subplot(131)
+plt.plot(c_equ_hist_r, color='red')
+plt.title('Cumulative Histogram of Equalized Red Channel',fontsize=11)
+plt.xlabel('Pixel Value')
+plt.ylabel('Cumulative Frequency')
+plt.subplot(132)
+plt.plot(c_equ_hist_g, color='green')
+plt.title('Cumulative Histogram of Equalized Green Channel',fontsize=11)
+plt.xlabel('Pixel Value')
+plt.ylabel('Cumulative Frequency')
+plt.subplot(133)
+plt.plot(c_equ_hist_b, color='blue')
+plt.title('Cumulative Histogram of Equalized Blue Channel',fontsize=11)
+plt.xlabel('Pixel Value')
+plt.ylabel('Cumulative Frequency')
+plt.tight_layout()
+plt.show()
+
+v_background = cv.bitwise_and(img_orig, img_orig, mask=cv.bitwise_not(mask_v)) 
+hist_equ_img = cv.add(v_background, equ_img)
+
+plt.figure(figsize=(6, 6))
+plt.imshow(v_background, cmap='gray')
+plt.title('Background on S Channel')
+plt.show()
+
+plt.figure(figsize=(14, 4))
+plt.subplot(1, 4, 1)
+plt.imshow(cv.cvtColor(img_orig, cv.COLOR_BGR2RGB))
+plt.title('Original Image')
+plt.axis('off')
+plt.subplot(1, 4, 2)
+plt.imshow(cv.cvtColor(v_background, cv.COLOR_BGR2RGB))
+plt.title('Background')
+plt.axis('off')
+plt.subplot(1, 4, 3)
+plt.imshow(cv.cvtColor(v_foreground, cv.COLOR_BGR2RGB))
+plt.title('Foreground')
+plt.axis('off')
+plt.subplot(1, 4, 4)
+plt.imshow(cv.cvtColor(hist_equ_img, cv.COLOR_BGR2RGB))
+plt.title('Foreground Equalized Image')
+plt.axis('off')
+plt.tight_layout()
+plt.show()
