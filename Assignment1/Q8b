@@ -1,0 +1,46 @@
+%matplotlib inline
+import cv2 as cv
+import numpy as np
+from matplotlib import pyplot as plt
+
+def zoom_bilinear(img_orig, zooming_factor):
+
+    height = img_orig.shape[0]
+    width = img_orig.shape[1]
+    zoomed_height = zooming_factor*height
+    zoomed_width = zooming_factor*width
+
+    img_zoomed = np.zeros((zoomed_height, zoomed_width, img_orig.shape[2]), dtype=np.uint8)
+    
+    for i in range(zoomed_height):
+        for j in range(zoomed_width):
+            original_i = (i / zooming_factor)
+            original_j = (j / zooming_factor)
+            
+            if original_i >= img_orig.shape[0] - 1 or original_j >= img_orig.shape[1] - 1:
+                img_zoomed[i, j] = img_orig[int(original_i), int(original_j)]
+
+            else:
+                top_left = img_orig[int(original_i), int(original_j)]
+                top_right = img_orig[int(original_i), int(original_j) + 1]
+                bottom_left = img_orig[int(original_i) + 1, int(original_j)]
+                bottom_right = img_orig[int(original_i) + 1, int(original_j) + 1]
+                
+                dx = original_j - int(original_j)
+                dy = original_i - int(original_i)
+                
+                interpolated_value = (1 - dx)*(1 - dy)*top_left + dx*(1 - dy)*top_right + (1 - dx)*dy*bottom_left + dx*dy*bottom_right
+                img_zoomed[i, j] = interpolated_value.astype(np.uint8)
+    
+    return img_zoomed
+
+
+img_orig = cv.imread('im01small.png', cv.IMREAD_COLOR)
+img_zoomed = zoom(img_orig, 3)
+
+cv.imwrite('BL1.png',img_zoomed)
+cv.imshow('Zoomed image',img_zoomed)
+cv.waitKey(0)
+cv.imshow("Original", img_orig)
+cv.waitKey(0)
+cv.destroyAllWindows()
