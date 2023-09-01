@@ -4,24 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 img_orig = cv.imread('highlights_and_shadows.jpg', cv.IMREAD_COLOR)
-
-
 img_lab = cv.cvtColor(img_orig, cv.COLOR_BGR2Lab)
-
 L_channel, a_channel, b_channel = cv.split(img_lab)
-gamma = 1.39
-
+gamma = 0.76
 table = np.array([(i/255.0)**(gamma)*255.0 for i in np.arange(0, 256)]).astype('uint8') 
 L_channel_g = cv.LUT(L_channel, table)                          
 img_lab_g = cv.merge((L_channel_g, a_channel, b_channel))  
-
-
 img_gamma = cv.cvtColor(img_lab_g, cv.COLOR_Lab2BGR)
 
 cv.imwrite('gamma_hns.jpg', img_gamma)
-
-
-
 
 img = cv.imread('gamma_hns.jpg', cv.IMREAD_COLOR)
 
