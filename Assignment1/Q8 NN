@@ -22,9 +22,9 @@ def zoom(img_orig, zooming_factor):
 
 
 
-img_orig = cv.imread('im01small.png', cv.IMREAD_COLOR)
-
-img_zoomed = zoom(img_orig, 3)
+img_orig = cv.imread('im11small.png', cv.IMREAD_COLOR)
+img_full = cv.imread('im11.png', cv.IMREAD_COLOR)
+img_zoomed = zoom(img_orig, 4)
 
 cv.imwrite('NN1.png',img_zoomed)
 cv.imshow('Zoomed Image',img_zoomed)
@@ -32,3 +32,12 @@ cv.waitKey(0)
 cv.imshow("Original", img_orig)
 cv.waitKey(0)
 cv.destroyAllWindows()
+
+def nssd(image1, image2):
+    ssd = np.sum((image1 - image2)**2)
+    s1 = np.sum(image1**2)
+    s2 = np.sum(image2**2)
+    nssd= ssd/(s1+s2)
+    return nssd
+val = nssd(img_zoomed,img_full)
+print(val)
