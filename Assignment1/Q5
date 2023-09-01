@@ -1,43 +1,43 @@
-# Histogram Equalization
 import cv2 as cv
 import numpy as np
 from matplotlib import pyplot as plt
-img = cv.imread('shells.tif',cv.IMREAD_GRAYSCALE)
 
+def hist_equ(img):
+    histogram, bins = np.histogram(img.flatten(), bins=256, range=(0, 256))
+    cdf = histogram.cumsum()
+    cdf_normalized = (cdf - cdf.min())*255/(cdf.max() - cdf.min())
+    LUT = np.interp(img.flatten(), bins[:-1], cdf_normalized) 
+    img_equ = LUT.reshape(img.shape).astype(np.uint8)
+    return img_equ
 
-hist,bins = np.histogram(img.ravel(),256,[0,256])
+img_orig = cv.imread('shells.tif', cv.IMREAD_GRAYSCALE)
+
+hist, bins = np.histogram(img_orig.ravel(), 256, [0, 256])
 cdf = hist.cumsum()
-cdf_normalized = cdf * hist.max()/ cdf.max()
-plt.plot(cdf_normalized, color = 'b')
-plt.hist(img.flatten(),256,[0,256], color = 'r')
-plt.xlim([0,256])
-plt.legend(('cdf','histogram'), loc = 'upper left')
-plt.title('Histogram of the Original Image')
+cdf_normalized = cdf * hist.max() / cdf.max()
+plt.plot(cdf_normalized)
+plt.hist(img.flatten(), 256, [0, 256])
+plt.xlim([0, 256])
+plt.legend(('CDF', 'Histogram'))
+plt.title('Histogram of Original Image')
 plt.show()
 
- 
-#equ = cv.equalizeHist(img)
-
-cdf_mapped = cdf_normalized * 255
-
-# round off values
-img_eq = np.round(cdf_mapped)
-
-# map the original intensity values to the equalized values
-equ = img_eq[img].astype('uint8')
-
-
-hist,bins = np.histogram(equ.ravel(),256,[0,256])
+img_equ = hist_equ(img_orig)
+hist, bins = np.histogram(equ.ravel(), 256, [0, 256])
 cdf = hist.cumsum()
-cdf_normalized = cdf * hist.max()/ cdf.max()
-plt.plot(cdf_normalized, color = 'b')
-plt.hist(equ.flatten(),256,[0,256], color = 'r')
-plt.xlim([0,256])
-plt.legend(('cdf','histogram'), loc = 'upper left')
-plt.title('Histogram of the Equalized Image')
+cdf_normalized = cdf * hist.max() / cdf.max()
+plt.plot(cdf_normalized)
+plt.hist(equ.flatten(), 256, [0, 256])
+plt.xlim([0, 256])
+plt.legend(('CDF', 'Histogram'))
+plt.title('Histogram of Equalized Image')
 plt.show()
 
-res = np.hstack((img,equ)) #stacking images side-by-side
-plt.axis('off')
-plt.imshow(img, cmap='gray')
-plt.imshow(res, cmap='gray')
+cv.namedWindow("Image", cv.WINDOW_AUTOSIZE)
+cv.imwrite('shells.jpg', img_orig)
+cv.imshow("Original Image", img_orig)
+cv.waitKey(0)
+cv.imwrite('histequ.jpg', img_equ)
+cv.imshow("Histogram Equalized Image", img_equ)
+cv.waitKey(0)
+cv.destroyAllWindows()
