@@ -19,3 +19,29 @@ axes[1].imshow(img_col_row, cmap='gray')
 axes[1].set_title('Sobel Horizontal')
 axes[1].set_xticks([]), axes[1].set_yticks([])
 plt.show()
+
+
+###########################################
+
+
+%matplotlib inline
+import cv2 as cv
+import numpy as np
+from matplotlib import pyplot as plt
+
+img_orig = cv.imread('einstein.png', cv.IMREAD_GRAYSCALE)
+ #for sobel vertical
+kernel_col = np.array([([1],[2],[1])], dtype='float') 
+kernel_row = np.array([(1, 0, -1)], dtype='float')
+
+img_col = cv.filter2D(img_orig , -1, kernel_col)    
+img_col_row = cv.filter2D(img_col, -1, kernel_row)    
+
+fig, axes  = plt.subplots(1,2, sharex='all', sharey='all', figsize=(12,12))
+axes[0].imshow(img_orig, cmap='gray')
+axes[0].set_title('Original Image')
+axes[0].set_xticks([]), axes[0].set_yticks([])
+axes[1].imshow(img_col_row, cmap='gray')
+axes[1].set_title('Sobel Horizontal FIltered Image')
+axes[1].set_xticks([]), axes[1].set_yticks([])
+plt.show()
