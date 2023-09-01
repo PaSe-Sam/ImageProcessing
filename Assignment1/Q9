@@ -1,0 +1,43 @@
+import cv2 as cv
+import numpy as np
+import matplotlib.pyplot as plt
+
+img_orig = cv.imread('flower.jpg', cv.IMREAD_COLOR)    
+mask = np.zeros(img_orig.shape[:2], np.uint8)
+rect = (40, 40, img_orig.shape[1]-40, img_orig.shape[0]-40)
+bgdModel = np.zeros((1, 65), np.float64)
+fgdModel = np.zeros((1, 65), np.float64)
+
+cv.grabCut(img_orig, mask, rect, bgdModel, fgdModel, 5, cv.GC_INIT_WITH_RECT)
+
+mask1 = np.where((mask == 2)|(mask == 0), 0, 1).astype('uint8')
+
+foreground = img_orig * mask1[:, :, np.newaxis]
+background = img_orig - foreground
+background_blur = cv.GaussianBlur(background, (21, 21), 0)
+
+img_enhanced = foreground + background_blur
+
+cv.imwrite('seg_mask.png', mask1)
+mask1 = cv.imread('seg_mask.png', cv.IMREAD_GRAYSCALE)
+
+cv.imshow('Segmentation Mask', mask1)
+cv.imwrite('seg_mask.png', mask1)
+cv.waitKey(0)
+
+cv.imshow('Foreground', foreground)
+cv.imwrite('foreground.png', foreground)
+cv.waitKey(0)
+
+cv.imshow('Background', background)
+cv.imwrite('background.png', background)
+cv.waitKey(0)
+
+cv.imshow('Original Image', img_orig)
+cv.imwrite('og.png', img_orig)
+cv.waitKey(0)
+
+cv.imshow('Enhanced Image', img_enhanced)
+cv.imwrite('enhanceed.png', img_enhanced)
+cv.waitKey(0)
+cv.destroyAllWindows()
