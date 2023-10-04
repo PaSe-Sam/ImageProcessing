@@ -74,7 +74,7 @@ max_y = y_vec[max_circle_idx]
 
 print()
 print(f"Largest Circle Radius: {max_radius}")
-print(f"Center Coordinates: ({max_x}, {max_y})")
+print(f"Centre Coordinates: ({max_x}, {max_y})")
 
 #Sigma values used
 min_sigma = np.min(sigmas)
